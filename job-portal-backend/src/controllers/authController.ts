@@ -8,7 +8,7 @@ import { generateToken } from '../utils/generateToken';
 
 interface RegisterBody {
   name: string;
-  email: string;
+  email: string
   password?: string; 
   role: 'candidate' | 'employer';
 }
@@ -38,6 +38,7 @@ export const register = async (req: Request<{}, {}, RegisterBody>, res: Response
     
     const user = new User({ name, email, password, role });
     await user.save(); 
+    console.log('User registered:', user);
 
    
     sendEmail({
@@ -54,6 +55,7 @@ export const register = async (req: Request<{}, {}, RegisterBody>, res: Response
 
    
     const token = generateToken(user);
+    console.log('Generated Token:', token);
     
     
     res.status(201).json({ 

@@ -1,14 +1,14 @@
 import express from 'express';
 import type  {Request, Response} from "express";
 import dotenv from 'dotenv';
-import { connectionToDatabase } from '../config/db';
+import { connectionToDatabase } from './config/db';
 
 dotenv.config();
 
 
 
 const app =express();
-const PORT= 5000;
+const PORT= process.env.PORT||5000;
 
 connectionToDatabase(process.env.MONGO_URI as string);
 

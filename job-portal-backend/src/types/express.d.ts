@@ -1,4 +1,4 @@
-import {IUserDocument} from '../models/User';
+import {IUserDocument} from '../src/models/User';
 import express from 'express';
 
 declare global{
