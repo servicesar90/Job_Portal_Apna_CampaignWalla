@@ -137,7 +137,7 @@ export const getJobById = async (req: AuthRequest, res: Response, next: NextFunc
 // --- 4. Update Job Controller ---
 export const updateJob = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const jobId = req.params.id;
+    const  jobId = req.params.id;
 
     // Edge Case: Check for invalid ObjectId format
     if (!mongoose.isValidObjectId(jobId)) {

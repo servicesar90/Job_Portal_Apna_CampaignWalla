@@ -75,13 +75,17 @@ export const register = async (req: Request<{}, {}, RegisterBody>, res: Response
 // --- 2. Login Controller ---
 export const login = async (req: Request<{}, {}, LoginBody>, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
-
+  console.log("ghghgg",req.body);
+  
   try {
     
     const user = await User.findOne({ email });
+    console.log(user)
     
     
-    const isPasswordCorrect = user && password ? await user.comparePassword(password) : false;
+    // const isPasswordCorrect = user && password ? await user.comparePassword(password) : false;
+    const isPasswordCorrect = user?.password === password;
+    console.log(isPasswordCorrect)
 
     if (!user || !isPasswordCorrect) {
       

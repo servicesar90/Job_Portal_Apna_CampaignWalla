@@ -128,7 +128,7 @@ export const getEmployerApplications = async (req: AuthRequest, res: Response, n
 
     // Edge Case 2: Get all jobs posted by the employer (selecting only ID for performance)
     const jobs = await Job.find({ postedBy: employerId }).select('_id');
-    const jobIds = jobs.map(j => j._id.toString());
+    const jobIds = jobs.map(j => j._id!.toString());
     
     // Edge Case 3: If employer has no jobs
     if (jobIds.length === 0) {

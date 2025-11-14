@@ -1,5 +1,5 @@
 import express from 'express';
-import { employerStats } from '../controllers/analyticsController';
+import { employerStats } from '../controllers/analyticsContoller';
 import { authMiddleware } from '../middleware/authMiddleware';
 import { roleMiddleware } from '../middleware/roleMiddleware';
 
