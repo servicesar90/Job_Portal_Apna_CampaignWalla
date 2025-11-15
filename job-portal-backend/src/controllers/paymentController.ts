@@ -38,12 +38,14 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
     }
 
     // Razorpay requires amount in smallest unit (e.g., paise for INR)
-    const razorpayAmount = Math.round(numericAmount * 100); 
-
+    const razorpayAmount = Math.round(numericAmount * 100);
+    const rece = `rcpt_${employerId}_${Date.now().toString().slice(-6)}` 
+    console.log("employerid",rece.length);
+    
     const options = {
       amount: razorpayAmount,
       currency,
-      receipt: `rcpt_${employerId}_${Date.now()}`, // More robust receipt ID
+      receipt: `rcpt_${employerId}_${Date.now().toString().slice(-6)}`, // More robust receipt ID
       payment_capture: 1 // Automatically capture the payment
     };
     
@@ -73,6 +75,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
   } catch (err) {
     // Delegates Razorpay API errors (which should be 500) or DB errors
     next(err);
+    console.log(err);
+    
   }
 };
 
@@ -151,6 +155,8 @@ export const verifyPayment = async (req: AuthRequest, res: Response, next: NextF
     res.status(200).json({ success: true, message: 'Payment successfully verified and processed', transaction: txn });
   } catch (err) {
     // Delegates DB errors (500) to global handler
+    console.log(err);
+    
     next(err);
   }
 };

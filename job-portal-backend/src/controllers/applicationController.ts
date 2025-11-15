@@ -4,7 +4,7 @@ import Job from '../models/Job';
 import Notification from '../models/Notification';
 import User, { IUserDocument } from '../models/User';
 import { sendEmail } from '../utils/email';
-import mongoose from 'mongoose'; // Added for ObjectId validation
+import mongoose from 'mongoose'; 
 
 // Define the custom Request type with the authenticated user object
 interface AuthRequest extends Request {
@@ -118,6 +118,7 @@ export const getCandidateApplications = async (req: AuthRequest, res: Response, 
 // --- 3. Get Employer Applications ---
 export const getEmployerApplications = async (req: AuthRequest, res: Response, next: NextFunction) => {
   // Edge Case 1: Authorization Check
+  
   if (!req.user || req.user.role !== 'employer') {
     return res.status(403).json({ success: false, message: 'Forbidden: Access restricted to employers' });
   }
@@ -125,6 +126,10 @@ export const getEmployerApplications = async (req: AuthRequest, res: Response, n
   try {
     const { jobId } = req.query as { jobId?: string };
     const employerId = req.user._id;
+    console.log("ghasfghafsgh",jobId,
+employerId
+    );
+    
 
     // Edge Case 2: Get all jobs posted by the employer (selecting only ID for performance)
     const jobs = await Job.find({ postedBy: employerId }).select('_id');

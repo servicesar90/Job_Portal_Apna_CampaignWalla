@@ -6,4 +6,5 @@ export const applyJob = (jobId: string, payload: any) =>
 export const getMyApplications = () => API.get("/applications/me");
 
 export const getEmployerApplications = () =>
+  
   API.get("/applications/employer");

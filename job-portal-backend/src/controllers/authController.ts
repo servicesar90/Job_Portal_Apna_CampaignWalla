@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import User from '../models/User';
-
 import { sendEmail } from '../utils/email';
 import { generateToken } from '../utils/generateToken';
 
@@ -18,6 +17,7 @@ interface LoginBody {
   email: string;
   password?: string; 
 }
+
 
 // --- 1. Register Controller ---
 export const register = async (req: Request<{}, {}, RegisterBody>, res: Response, next: NextFunction) => {

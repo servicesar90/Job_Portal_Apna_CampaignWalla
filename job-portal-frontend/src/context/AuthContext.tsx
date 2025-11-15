@@ -13,6 +13,7 @@ interface AuthContextType {
   token: string | null;
   loginUser: (user: User, token: string) => void;
   logout: () => void;
+  loading: boolean, 
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -20,11 +21,13 @@ export const AuthContext = createContext<AuthContextType>({
   token: null,
   loginUser: () => {},
   logout: () => {},
+  loading: true, 
 });
 
 export const AuthProvider = ({ children }: any) => {
   const [user, setUser] = useState<User | null>(null);
   const [tokenState, setTokenState] = useState<string | null>(getToken());
+   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const stored = localStorage.getItem("auth");
@@ -33,6 +36,7 @@ export const AuthProvider = ({ children }: any) => {
       setUser(parsed.user);
       setTokenState(parsed.token);
     }
+    setLoading(false);
   }, []);
 
   const loginUser = (u: User, t: string) => {
@@ -51,7 +55,7 @@ export const AuthProvider = ({ children }: any) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token: tokenState, loginUser, logout }}>
+    <AuthContext.Provider value={{ user, token: tokenState, loginUser, logout , loading}}>
       {children}
     </AuthContext.Provider>
   );
