@@ -3,8 +3,10 @@ import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import JobCard from "../../components/jobs/JobCard";
 import { getJobs } from "../../services/jobService";
+import { useSocket } from "../../hooks/useSocket";
 
 export default function Home() {
+  const socket = useSocket();
   const [jobs, setJobs] = useState([]);
   const [q, setQ] = useState("");
 
@@ -18,6 +20,17 @@ export default function Home() {
   useEffect(() => {
     loadJobs();
   }, []);
+
+   useEffect(() => {
+  if (!socket) return;
+
+  socket.on("notifyCandidate", (data) => {
+    console.log("Real-time job posted:", data);
+    alert(data.message);
+  });
+
+  return () => socket.off("notifyEmployer");
+}, [socket]);
 
   return (
     <div>

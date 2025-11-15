@@ -6,6 +6,7 @@ import { AuthContext } from "../../context/AuthContext";
 import Input from "../../components/ui/Input";
 import Textarea from "../../components/ui/Textarea";
 import Button from "../../components/ui/Button";
+import { useSocket } from "../../hooks/useSocket";
 
 export default function JobDetails() {
   const { id } = useParams();
@@ -20,11 +21,58 @@ export default function JobDetails() {
     if (id) getJob(id).then((res) => setJob(res.data.job));
   }, [id]);
 
+
+  
+  const socket = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+    
+    
+    socket.on("jobAdded", () => {
+      console.log("Job added in real time:");
+    });
+
+    return () => {
+      socket.off("jobAdded");
+    };
+  }, [socket]);
+
+  useEffect(() => {
+  if (!socket) return;
+
+  socket.on("notifyEmployer", (data) => {
+    console.log("Real-time applicant:", data);
+    alert(data.message);
+  });
+
+  return () => socket.off("notifyEmployer");
+}, [socket]);
+
+ 
+
   const apply = async () => {
     if (!user) return alert("Login first");
 
-    await applyJob(id!, { resumeLink, coverLetter });
-    alert("Application submitted");
+    try {
+      const res = await applyJob(id!, { resumeLink, coverLetter });
+      if (res.status === 201 || res.status === 200) {
+      socket?.emit("jobApplied", {
+        jobId: id,
+        candidateId: user._id,
+        message: `${user?.name} applied to ${job?.title}`
+      });
+
+      alert("Application submitted");
+    }
+    } catch (error) {
+       // If backend sends 409 → Already applied
+    if (error?.response?.status === 409) {
+      return alert("You have already applied to this job");
+    }
+
+    alert("Something went wrong");
+    }
   };
 
   const handleDelete = async () => {

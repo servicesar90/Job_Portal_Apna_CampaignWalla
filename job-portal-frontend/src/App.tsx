@@ -5,6 +5,7 @@ import Navbar from './components/layout/Navbar';
 import Chatbot from './components/misc/Chatbot';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { useSocket } from './hooks/useSocket';
 
 function App() {
   return (

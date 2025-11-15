@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { getEmployerApplications } from "../../services/applicationService";
 import Card from "../../components/ui/Card";
 import { Link } from "react-router-dom";
+import { useSocket } from "../../hooks/useSocket";
 
 export default function EmployerDashboard() {
   const [apps, setApps] = useState([]);
+  const socket = useSocket();
 
   useEffect(() => {
   getEmployerApplications()
@@ -15,6 +17,17 @@ export default function EmployerDashboard() {
       console.error("Error fetching employer applications:", err);
     });
 }, []);
+
+useEffect(() => {
+  if (!socket) return;
+
+  socket.on("notifyEmployer", (data) => {
+    console.log("Real-time applicant:", data);
+    alert(data.message);
+  });
+
+  return () => socket.off("notifyEmployer");
+}, [socket]);
 
 
   return (

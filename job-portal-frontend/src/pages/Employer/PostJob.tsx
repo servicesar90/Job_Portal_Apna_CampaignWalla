@@ -5,12 +5,14 @@ import Button from "../../components/ui/Button";
 import { createJob, getJob, updateJob } from "../../services/jobService";
 import { useParams, useNavigate } from "react-router-dom";
 import { createOrder, verifyPayment } from "../../services/paymentService";
+import { useSocket } from "../../hooks/useSocket";
 
 interface PostJobProps {
   isEdit?: boolean;
 }
 
 export default function PostJob({ isEdit = false }: PostJobProps) {
+  const socket = useSocket();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -55,6 +57,10 @@ export default function PostJob({ isEdit = false }: PostJobProps) {
     // ----------------- CREATE JOB -----------------
     if (!form.isPremium) {
       await createJob(form);
+      socket?.emit("jobPosted", {
+        success: true,
+        message: "New job posted: " + form.title,
+      });
       alert("Job posted");
       navigate("/");
       return;

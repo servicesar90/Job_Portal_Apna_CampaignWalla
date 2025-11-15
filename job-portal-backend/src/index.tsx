@@ -28,7 +28,10 @@ const app =express();
 const PORT= process.env.PORT||5001;
 const httpServer = createServer(app);
 const io = new SocketIoServer(httpServer, {
-    cors:{origin: process.env.CLIENT_URL || '*' }
+   cors: {
+    origin: "*",   // allow all origins
+    methods: ["GET", "POST","PUT","DELETE"]
+  }
 })
 
 
@@ -72,6 +75,20 @@ io.on('connection',(socket:any)=>{
     socket.on('joinRoom',(room: string)=>{
         socket.join(room);
     });
+
+    socket.on("jobApplied", (data:any) => {
+    console.log("Job applied event:", data);
+
+    // ⭐ notify all employers OR specific employer
+    io.emit("notifyEmployer", data);
+  });
+
+  socket.on("jobPosted", (data:any) => {
+    console.log("Job Posted event:", data);
+
+    // ⭐ notify all employers OR specific employer
+    io.emit("notifyCandidate", data);
+  });
 
     socket.on('disconnect',()=>{
         console.log('socket.io disconnected',socket.id);
