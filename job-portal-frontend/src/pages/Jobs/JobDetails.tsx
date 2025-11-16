@@ -20,11 +20,13 @@ export default function JobDetails() {
   const [coverLetter, setCoverLetter] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const socket = useSocket();
+  const socket = useSocket() || null;
 
   useEffect(() => {
-    if (!id) return toast.error("Invalid Job ID");
-
+    if (!id){ 
+      toast.error("Invalid Job ID");
+      return 
+    }
     getJob(id)
       .then((res) => setJob(res.data.job))
       .catch(() => toast.error("Failed to load job"))
@@ -34,11 +36,13 @@ export default function JobDetails() {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("notifyEmployer", (data) => {
-      toast.success(data.message);
+    socket?.on("notifyEmployer", (data) => {
+      toast.success(data?.message);
     });
 
-    return () => socket.off("notifyEmployer");
+    return () => {
+    socket.off("notifyEmployer");
+  };
   }, [socket]);
 
   const isValidResumeLink = (link: string) => {

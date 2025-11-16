@@ -38,7 +38,7 @@ export default function EmployerDashboard() {
       toast.success(data.message || "New application received!");
     });
 
-    return () => socket.off("notifyEmployer");
+    return () => {socket.off("notifyEmployer");}
   }, [socket]);
 
   return (

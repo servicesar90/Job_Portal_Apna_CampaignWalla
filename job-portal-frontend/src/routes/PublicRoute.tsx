@@ -11,7 +11,7 @@ export default function PublicRoute({ children }: Props) {
   const lastVisited = localStorage.getItem("lastVisited")  ;
 
   if (user) {
-    return <Navigate to ={lastVisited} replace />;
+    return <Navigate to={lastVisited!} replace />;
   }
 
   return <>{children}</>;

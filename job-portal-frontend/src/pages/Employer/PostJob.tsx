@@ -164,7 +164,7 @@ export default function PostJob({ isEdit = false }: PostJobProps) {
                 type="text"
                 id={field}
                 placeholder=" "
-                value={form[field as keyof typeof form]}
+                value={String(form[field as keyof typeof form])}
                 onChange={(e) => handleChange(field, e.target.value)}
                 className={`peer block w-full rounded-md border px-3 pt-5 pb-2 text-gray-900 placeholder-transparent focus:ring-1 ${
                   errors[field as keyof typeof errors]

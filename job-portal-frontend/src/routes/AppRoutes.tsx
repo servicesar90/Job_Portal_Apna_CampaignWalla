@@ -16,9 +16,7 @@ const PostJob = React.lazy(() => import("../pages/Employer/PostJob"));
 const CandidateDashboard = React.lazy(
   () => import("../pages/Candidate/Dashboard")
 );
-const EmployerTransactions = React.lazy(
-  () => import("../pages/Employer/transactions")
-);
+const EmployerTransactions = React.lazy(() => import("../pages/Employer/Transactions"));
 
 export default function AppRoutes() {
   return (

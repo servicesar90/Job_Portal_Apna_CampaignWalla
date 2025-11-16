@@ -2,9 +2,9 @@ import { Link, useLocation } from "react-router-dom";
 import { useContext, useState, useRef, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext";
 
-const UserDropdown = ({ user, logout }) => {
+const UserDropdown = ({ user, logout }: { user: any; logout: () => void }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
   const initial = user?.name ? user.name.charAt(0).toUpperCase() : "U";
   const location = useLocation();
 
@@ -14,7 +14,7 @@ const UserDropdown = ({ user, logout }) => {
   };
 
   useEffect(() => {
-    function handleClickOutside(event) {
+    function handleClickOutside(event: { target: any; }) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
       }

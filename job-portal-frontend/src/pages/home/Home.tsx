@@ -69,7 +69,7 @@ export default function Home() {
       toast.success(data.message || "New job notification!");
     });
 
-    return () => socket.off("notifyCandidate");
+    return () => {socket.off("notifyCandidate");}
   }, [socket]);
 
   const handleManualSearch = () => {
