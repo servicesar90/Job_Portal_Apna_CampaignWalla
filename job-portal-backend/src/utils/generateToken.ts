@@ -20,7 +20,7 @@ export const generateToken = (user: IUserDocument): string => {
     role: user.role,
   };
 
-  // ✅ Explicitly define expiresIn as SignOptions["expiresIn"] type
+  
   const options: SignOptions = {
     expiresIn: (process.env.JWT_EXPIRES_IN as SignOptions["expiresIn"]) || "7d",
   };

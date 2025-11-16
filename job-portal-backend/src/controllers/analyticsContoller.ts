@@ -1,15 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import Job from '../models/Job';
-// import Application from '../models/Application'; // <-- REMOVED: No longer strictly necessary due to aggregation
+
 import { IUserDocument } from '../models/User'; 
 
 interface AuthRequest extends Request {
   user?: IUserDocument;
 }
 
-/**
- * Controller to fetch key statistics for an authenticated employer.
- */
+
 export const employerStats = async (req: AuthRequest, res: Response, next: NextFunction) => {
   // Edge Case 1: Check for Authentication and Role
   if (!req.user || req.user.role !== 'employer') {
@@ -19,13 +17,11 @@ export const employerStats = async (req: AuthRequest, res: Response, next: NextF
   try {
     const employerId = req.user._id;
 
-    // --- Data Retrieval using Aggregation ---
     const result = await Job.aggregate([
       { 
         $match: { postedBy: employerId } 
       },
       {
-        // The `$lookup` stage uses the data from the 'applications' collection
         $lookup: {
           from: 'applications', 
           localField: '_id',
@@ -70,7 +66,6 @@ export const employerStats = async (req: AuthRequest, res: Response, next: NextF
     
     const { totalJobs, totalApplicants, perJob } = stats;
 
-    // Edge Case 3: Conversion Rate Calculation
     const conversionRate = totalJobs > 0 
       ? parseFloat(((totalApplicants / totalJobs) * 100).toFixed(2)) 
       : 0;

@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import React from "react";
 import ProtectedRoute from "../components/misc/ProtectedRoute";
 
+
 import Home from "../pages/home/Home";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
@@ -14,6 +15,9 @@ const EmployerDashboard = React.lazy(
 const PostJob = React.lazy(() => import("../pages/Employer/PostJob"));
 const CandidateDashboard = React.lazy(
   () => import("../pages/Candidate/Dashboard")
+);
+const EmployerTransactions = React.lazy(
+  () => import("../pages/Employer/transactions")
 );
 
 export default function AppRoutes() {
@@ -68,14 +72,22 @@ export default function AppRoutes() {
       />
 
       <Route
-  path="/employer/update-job/:id"
-  element={
-    <ProtectedRoute role="employer">
-      <PostJob isEdit={true} />
-    </ProtectedRoute>
-  }
-/>
+        path="/employer/update-job/:id"
+        element={
+          <ProtectedRoute role="employer">
+            <PostJob isEdit={true} />
+          </ProtectedRoute>
+        }
+      />
 
+      <Route
+        path="/employer/transactions"
+        element={
+          <ProtectedRoute role="employer">
+            <EmployerTransactions />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

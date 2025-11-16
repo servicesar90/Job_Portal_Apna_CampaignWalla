@@ -19,7 +19,6 @@ interface LoginBody {
 }
 
 
-// --- 1. Register Controller ---
 export const register = async (req: Request<{}, {}, RegisterBody>, res: Response, next: NextFunction) => {
  
   const { name, email, password, role } = req.body; 
@@ -70,7 +69,6 @@ export const register = async (req: Request<{}, {}, RegisterBody>, res: Response
   }
 };
 
-// -----------------------------------
 
 // --- 2. Login Controller ---
 export const login = async (req: Request<{}, {}, LoginBody>, res: Response, next: NextFunction) => {

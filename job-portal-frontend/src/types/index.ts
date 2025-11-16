@@ -24,7 +24,7 @@ export interface Application {
   coverLetter: string;
   createdAt: string;
 
-  // populated fields:
+ 
   candidate?: User;
   job?: Job;
 }

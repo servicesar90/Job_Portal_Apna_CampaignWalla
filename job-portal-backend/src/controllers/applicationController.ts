@@ -11,9 +11,7 @@ interface AuthRequest extends Request {
   user?: IUserDocument;
 }
 
-// --- 1. Apply for Job Controller ---
 export const applyForJob = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  // Edge Case 1: Check for authentication and correct role (Candidate)
   if (!req.user || req.user.role !== 'candidate') {
     return res.status(403).json({ success: false, message: 'Forbidden: Only candidates can apply for jobs' });
   }
@@ -23,27 +21,21 @@ export const applyForJob = async (req: AuthRequest, res: Response, next: NextFun
   const candidateId = req.user._id;
 
   try {
-    // Edge Case 2: Validate job ID format early
     if (!mongoose.isValidObjectId(jobId)) {
         return res.status(400).json({ success: false, message: 'Invalid job ID format' });
     }
 
-    // Edge Case 3: Job Not Found
-    const job = await Job.findById(jobId).select('+postedBy'); // Ensure postedBy is selected if hidden
+    const job = await Job.findById(jobId).select('+postedBy'); 
     if (!job) {
         return res.status(404).json({ success: false, message: 'Job not found' });
     }
 
-    // Edge Case 4: Check if already applied (using a dedicated query for clarity)
     const alreadyApplied = await Application.findOne({ job: jobId, candidate: candidateId });
     if (alreadyApplied) {
-        // 409 Conflict: Better than 400 when a unique constraint (job + candidate) is violated.
         return res.status(409).json({ success: false, message: 'Conflict: Already applied to this job' });
     }
 
-    // --- Start Critical Operation (Database Atomicity Issue) ---
-    // Note: To truly handle atomicity (where multiple saves must succeed or fail together), 
-    // a MongoDB transaction is recommended, but we proceed with simple saves here.
+    
 
     const application = new Application({
       job: job._id,
@@ -52,9 +44,8 @@ export const applyForJob = async (req: AuthRequest, res: Response, next: NextFun
       coverLetter
     });
 
-    await application.save(); // Mongoose validation errors delegated to catch block
+    await application.save(); 
 
-    // Increment application count robustly
     job.applicationCount = (job.applicationCount || 0) + 1;
     await job.save();
 
@@ -62,9 +53,8 @@ export const applyForJob = async (req: AuthRequest, res: Response, next: NextFun
     const employer = await User.findById(job.postedBy).select('email');
     if (!employer) {
         console.warn(`Employer for job ${jobId} not found. Cannot send email/notification.`);
-        // Non-critical error, continue to 201 response.
+       
     } else {
-        // 6. Create Notification
         const notification = new Notification({
             user: employer._id,
             title: 'New Application',
@@ -72,37 +62,34 @@ export const applyForJob = async (req: AuthRequest, res: Response, next: NextFun
         });
         await notification.save();
 
-        // 7. Send Email (non-blocking)
+       
         sendEmail({
             to: employer.email,
             subject: `New Application for ${job.title}`,
             text: `${req.user.name} applied to your job`
         }).catch(console.error);
 
-        // 8. Emit Socket Event (non-blocking)
+      
         const io = req.app.get('io') as any;
         if (io) io.to(employer._id.toString()).emit('newApplication', { jobId: job._id, candidateId: candidateId });
     }
-    // --- End Critical Operation ---
-
+    
     // 201 Created
     res.status(201).json({ success: true, application });
 
   } catch (err) {
-    // Edge Case 9: Delegate Mongoose errors (Validation, DB connection)
+    
     next(err);
   }
 };
 
-// --- 2. Get Candidate Applications ---
 export const getCandidateApplications = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  // Edge Case 1: Authorization Check
   if (!req.user || req.user.role !== 'candidate') {
     return res.status(403).json({ success: false, message: 'Forbidden: Access restricted to candidates' });
   }
 
   try {
-    // Find applications posted by the authenticated user
+    
     const applications = await Application.find({ candidate: req.user._id }).populate({
         path: 'job',
         select: 'title company location salary' // Limit fields to protect employer data
@@ -115,7 +102,6 @@ export const getCandidateApplications = async (req: AuthRequest, res: Response, 
   }
 };
 
-// --- 3. Get Employer Applications ---
 export const getEmployerApplications = async (req: AuthRequest, res: Response, next: NextFunction) => {
   // Edge Case 1: Authorization Check
   
@@ -164,43 +150,35 @@ employerId
   }
 };
 
-// --- 4. Update Application Status Controller ---
 export const updateApplicationStatus = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  // Edge Case 1: Authorization Check
   if (!req.user || req.user.role !== 'employer') {
     return res.status(403).json({ success: false, message: 'Forbidden: Access restricted to employers' });
   }
   
   try {
-    const { id } = req.params; // Application ID
+    const { id } = req.params; 
     const { status } = req.body;
     
-    // Edge Case 2: Validate Application ID format
     if (!mongoose.isValidObjectId(id)) {
         return res.status(400).json({ success: false, message: 'Invalid application ID format' });
     }
 
-    // Edge Case 3: Application Not Found
     const application = await Application.findById(id).populate('job');
     if (!application) {
         return res.status(404).json({ success: false, message: 'Application not found' });
     }
 
-    // Edge Case 4: Check if the application's job field is populated and valid
     const job = application.job as any;
     if (!job || !job.postedBy) {
-        // Internal server issue: Job data is corrupted or missing
         console.error(`Application ${id} linked to invalid job data.`);
         return res.status(500).json({ success: false, message: 'Internal Server Error: Corrupted application data' });
     }
 
-    // Edge Case 5: Authorization Check - Must be the job poster
     if (job.postedBy.toString() !== req.user._id.toString()) {
         // 403 Forbidden
         return res.status(403).json({ success: false, message: 'Forbidden: Not authorized to modify this application status' });
     }
     
-    // Edge Case 6: Validate Status value (Should be done by validation middleware, but defensive check)
     const validStatuses = ['Pending', 'Reviewed', 'Interviewed', 'Rejected', 'Hired'];
     if (!validStatuses.includes(status)) {
         return res.status(400).json({ success: false, message: 'Invalid status value' });
@@ -210,7 +188,7 @@ export const updateApplicationStatus = async (req: AuthRequest, res: Response, n
     application.updatedAt = new Date();
     await application.save();
 
-    // 7. Notification and Socket event (non-critical)
+   
     const notification = new Notification({
       user: application.candidate,
       title: `Application Status Update`, // Better title
@@ -228,9 +206,9 @@ export const updateApplicationStatus = async (req: AuthRequest, res: Response, n
   }
 };
 
-// --- 5. Withdraw Application Controller ---
+
 export const withdrawApplication = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  // Edge Case 1: Authorization Check
+ 
   if (!req.user || req.user.role !== 'candidate') {
     return res.status(403).json({ success: false, message: 'Forbidden: Access restricted to candidates' });
   }
@@ -239,25 +217,21 @@ export const withdrawApplication = async (req: AuthRequest, res: Response, next:
     const { id } = req.params; // Application ID
     const candidateId = req.user._id;
 
-    // Edge Case 2: Validate Application ID format
     if (!mongoose.isValidObjectId(id)) {
         return res.status(400).json({ success: false, message: 'Invalid application ID format' });
     }
 
     const application = await Application.findById(id);
     
-    // Edge Case 3: Application Not Found
     if (!application) {
         return res.status(404).json({ success: false, message: 'Application not found' });
     }
     
-    // Edge Case 4: Authorization Check - Must be the candidate who applied
     if (application.candidate.toString() !== candidateId.toString()) {
         // 403 Forbidden
         return res.status(403).json({ success: false, message: 'Forbidden: Not authorized to withdraw this application' });
     }
 
-    // Edge Case 5: Check if already withdrawn or finalized (e.g., Hired/Rejected)
     if (application.status === 'Withdrawn') {
          return res.status(400).json({ success: false, message: 'Application is already withdrawn' });
     }

@@ -19,7 +19,7 @@ export default function ProtectedRoute({
       <Navigate
         to={
           user.role === "employer"
-            ? "/employer/dashboard"
+            ? "/Home"
             : "/candidate/dashboard"
         }
         replace

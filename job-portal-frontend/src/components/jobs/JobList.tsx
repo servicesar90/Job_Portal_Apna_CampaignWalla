@@ -17,9 +17,9 @@ export default function JobList({ jobs, loading }: JobListProps) {
     );
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4 ">
       {jobs.map((job) => (
-        <JobCard key={job._id} job={job} />
+        <JobCard className='mb-5' key={job._id} job={job} />
       ))}
     </div>
   );
